@@ -18,7 +18,7 @@ class RoadLengthRatio(params: Map[SamplePeriod, IndicatorCalculationParams])
 
 
 
-  def calculation(period: SamplePeriod) =
+  def calculation(period: SamplePeriod) = {
     val totalRoadLength = params(period).totalRoadLength
     new PerRouteIndicatorCalculation[Double] {
       def map(trips: Seq[Trip]): Double =
@@ -32,4 +32,5 @@ class RoadLengthRatio(params: Map[SamplePeriod, IndicatorCalculationParams])
       def reduce(stops: Seq[Double]): Double =
         stops.foldLeft(0.0)(_ + _) / totalRoadLength
     }
+  }
 }
