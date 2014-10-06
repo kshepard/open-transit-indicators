@@ -27,44 +27,32 @@ case class IndicatorCalculationRequest(
   // which is a big win for modularity. Global state objects like this are icky.
   // There's surely a better way to get the information that any one Indicator needs
   // to it without having to pass everything to everyone.
-  def toParams(implicit session: Session) = {
-    // Get boundary
-    val cityBoundary = BoundariesTable.boundary(cityBoundaryId)
-    val regionBoundary = BoundariesTable.boundary(regionBoundaryId)
-    val totalRoadLength = {
-      debug("Fetching Roads")
-      val roadLines: List[Line] = RoadsTable.allRoads
-      val distinctRoadLines: Array[Line] =
-        (MultiLine(roadLines: _*).union match {
-          case MultiLineResult(ml) => ml
-          case LineResult(l) => MultiLine(l)
-          case NoResult => MultiLine.EMPTY
-        }).lines
-      val len = distinctRoadLines.map(x => x.length).sum / 1000
-      debug(s"Length of roadlines: $len")
-      len
-    }
 
-    IndicatorCalculationParams(
-      povertyLine,
-      nearbyBufferDistance,
-      maxCommuteTime,
-      maxWalkTime,
-      cityBoundary,
-      regionBoundary,
-      averageFare,
-      totalRoadLength
-    )
+
+  def toParams(systems: Map[SamplePeriod, TransitSystem])(implicit session: Session): Map[SamplePeriod, IndicatorParams] = {
+      val stopBuffers = StopBuffers(systems, this.nearbyBufferDistance)
+      systems.map{case (period, transitSystem) =>
+
+        period -> new IndicatorParams with StopBuffers {
+
+          def bufferForStop(stop: Stop): Polygon = stopBuffers.bufferForStop(stop)
+          def bufferForPeriod(period: SamplePeriod): MultiPolygon = stopBuffers.bufferForPeriod(period)
+          def totalBuffer: MultiPolygon = stopBuffers.totalBuffer
+
+          val settings =
+            IndicatorSettings(
+              this.povertyLine,
+              this.nearbyBufferDistance,
+              this.maxCommuteTime,
+              this.maxWalkTime,
+              this.averageFare
+          )
+          val cityBoundary = Boundaries.cityBoundary(this.cityBoundaryId)
+          val regionBoundary = Boundaries.cityBoundary(this.regionBoundaryId)
+
+          // val populationUnder = Demographics(db)
+          val totalRoadLength = RoadLength.totalRoadLength
+        }
+      }
   }
 }
-
-case class IndicatorCalculationParams(
-  povertyLine: Double,
-  nearbyBufferDistance: Double,
-  maxCommuteTime: Int,
-  maxWalkTime: Int,
-  cityBoundary: MultiPolygon,
-  regionBoundary: MultiPolygon,
-  averageFare: Double,
-  totalRoadLength: Double
-)
