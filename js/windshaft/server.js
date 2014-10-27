@@ -28,12 +28,12 @@ var config = {
         // version, sample_period, aggregation can all be 0 for these requests
         if (req.params.type === 'gtfs_shapes') {
             var gtfsShapes = new oti.GTFSShapes();
-            req.params.sql = gtfsShapes.getSql();
+            req.params.sql = gtfsShapes.getSql(req.query.modes);
             req.params.style = gtfsShapes.getStyle();
         } else if (req.params.type === 'gtfs_stops') {
             var gtfsStops = new oti.GTFSStops();
             var filetype = req.query.interactivity ? 'utfgrid' : 'png';
-            req.params.sql = gtfsStops.getSql(filetype);
+            req.params.sql = gtfsStops.getSql(filetype, req.query.modes);
             req.params.style = gtfsStops.getStyle();
         } else if (req.params.type === 'coverage_ratio_stops_buffer') {
             var gtfsStopsBuffers = new oti.GTFSStopsBuffers();
