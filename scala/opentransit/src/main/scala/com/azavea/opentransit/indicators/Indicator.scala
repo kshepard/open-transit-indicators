@@ -73,14 +73,6 @@ object Indicators {
         Requires(settings.hasCityBounds)
       ),
       (
-        new AllWeightedServiceFrequency(params),
-        Requires(settings.hasDemographics)
-      ),
-      (
-        new LowIncomeWeightedServiceFrequency(params),
-        Requires(settings.hasDemographics)
-      ),
-      (
         new AllAccessibility(params),
         Requires(settings.hasDemographics)
       ),

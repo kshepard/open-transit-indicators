@@ -15,6 +15,7 @@ import os
 from kombu import Exchange, Queue
 
 # Import stuff created by the provision script
+
 from secret_key import *
 from provision_settings import *
 
@@ -25,7 +26,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 # See https://docs.djangoproject.com/en/dev/howto/deployment/checklist/
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 TEMPLATE_DEBUG = DEBUG
 

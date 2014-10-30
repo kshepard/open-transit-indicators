@@ -14,9 +14,9 @@ import scala.slick.jdbc.{StaticQuery => Q}
 case class Demographic(
   id: Int,
   geom: Projected[Point], // Location-dependent SRID (UTM zone)
-   populationMetric1: Double,
-   populationMetric2: Double,
-   destinationMetric1: Double
+  populationMetric1: Double,
+  populationMetric2: Double,
+  destinationMetric1: Double
 )
 
 object DemographicsTable {

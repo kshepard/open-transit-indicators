@@ -243,15 +243,6 @@ class Indicator(models.Model):
             self.count = 0
             self.errors = []
 
-    def save(self, *args, **kwargs):
-        units = Indicator.IndicatorTypes.INDICATOR_UNITS.get(self.type, None) if self.type else None
-        if units:
-            self.formatted_value = u"%s %s" % (round(self.value, 2), units)
-        else:
-            self.formatted_value = u"%s" % round(self.value, 2)
-
-        super(Indicator, self).save(*args, **kwargs)
-
     @classmethod
     def load(cls, data, city_name, user):
         """ Load passed csv into Indicator table using city_name as a reference value
@@ -458,15 +449,20 @@ class Indicator(models.Model):
     # Numerical value of the indicator calculation
     value = models.FloatField(default=0)
 
-    # Value of the calculation, formatted for display
-    formatted_value = models.CharField(max_length=255, null=True)
+    @property
+    def formatted_value(self):
+        """Display value for units"""
+        units = Indicator.IndicatorTypes.INDICATOR_UNITS.get(self.type, None) if self.type else None
+        if units:
+            return u"%s %s" % (round(self.value, 2), units)
+        return u"%s" % round(self.value, 2)
 
     # Cached geometry for this indicator only used by Windshaft
     the_geom = models.GeometryField(srid=4326, null=True)
 
     objects = models.GeoManager()
 
-    class Meta(object):
-        # An indicators uniqueness is determined by all of these things together
-        # Note that route_id and route_type can be null.
-        unique_together = (("sample_period", "type", "aggregation", "route_id", "route_type", "calculation_job"),)
+    # class Meta(object):
+    #     # An indicators uniqueness is determined by all of these things together
+    #     # Note that route_id and route_type can be null.
+    #     unique_together = (("sample_period", "type", "aggregation", "route_id", "route_type", "calculation_job"),)
